@@ -1,0 +1,90 @@
+directive @connection on OBJECT
+directive @Range(min: Int = 0, max: Int = 2147483647, message: String= "Invalid input value") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @Size(min : Int = 0, max : Int = 2147483647, message : String = "graphql.validation.Size.message")
+on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @NotBlank(message : String = "graphql.validation.NotBlank.message") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+scalar Currency
+scalar UUID
+scalar BigDecimal
+
+
+scalar Long
+
+type Query {
+    fetchProducts: [Product]
+    fetchCustomers(paginationInput: PaginationInput): CustomerConnection
+}
+
+type Mutation {
+    createProduct(input: CreateProductInput): Boolean
+}
+
+input CreateProductInput {
+    name: String @NotBlank
+    productType: ProductType
+    productStatus: ProductStatus
+    active: Boolean
+    rentalPrice: BigDecimal
+    location: String
+    shopId: UUID
+    currency: Currency
+}
+
+
+type Product {
+    productId: UUID
+    name: String
+    productType: ProductType
+    productStatus: ProductStatus
+    active: Boolean
+    rentalPrice: BigDecimal
+    location: String
+    shopId: UUID
+    currency: Currency
+}
+
+enum ProductType {
+    BIKE
+    SCOOTER
+}
+
+enum ProductStatus{
+    AVAILABLE
+    RENTED
+}
+
+type Customer {
+    customerId: UUID
+    name: String
+    email: String
+    address: String
+    balance: BigDecimal
+}
+
+type PageInfo {
+    "Field hasPreviousPage"
+    hasPreviousPage: Boolean!
+    "Field hasNextPage"
+    hasNextPage: Boolean!
+    "Field startCursor"
+    startCursor: String
+    "Field endCursor"
+    endCursor: String
+    totalCount: Long!
+}
+
+type CustomerConnection {
+    edges: [CustomerEdge!],
+    pageInfo: PageInfo!
+}
+
+type CustomerEdge {
+    node: Customer!
+    cursor: String!
+}
+
+input PaginationInput {
+    first: Int = 10 @Range(min: 1, max: 1000)
+    after: String
+}
